@@ -1,10 +1,11 @@
 import express from "express";
 import { PORT, MongoDBURL } from "./config.js";
 import mongoose from "mongoose";
-import { Book } from "./models/bookModels.js";
+import bookRoute from "./routes/bookRoute.js";
+import cors from "cors";
 
 const app = express();
-
+app.use(cors());
 app.use(express.json());
 
 app.get("/", (request, response) => {
@@ -12,27 +13,7 @@ app.get("/", (request, response) => {
   return response.status(234).send("Learning MERN");
 });
 
-app.post("/books", async (request, response) => {
-  try {
-    if (
-      !request.body.title ||
-      !request.body.author ||
-      !request.body.publishYear
-    ) {
-      return response.status(400).send({ message: "All fields required" });
-    }
-    const newBook = {
-      title: request.body.title,
-      author: request.body.author,
-      publishYear: request.body.publishYear,
-    };
-    const book = await Book.create(newBook);
-    return response.status(201).send(book);
-  } catch (error) {
-    console.log(error);
-    response.status(500).send({ message: error.message });
-  }
-});
+app.use("/books", bookRoute);
 
 mongoose
   .connect(MongoDBURL)
